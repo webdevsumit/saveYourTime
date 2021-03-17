@@ -65,6 +65,9 @@ class Service(models.Model):
     ServiceFeedback = models.ManyToManyField(ServiceFeedback, blank=True)
     Description = models.TextField(default='Description box is empty.')
     VStatus = models.BooleanField(default=False)
+    Address = models.TextField(default='0')
+    lat = models.FloatField(default=0)
+    lng = models.FloatField(default=0)
     
     def __str__(self):
         return self.ShopName
@@ -75,6 +78,8 @@ class Profile(models.Model):
     Image = models.OneToOneField(Images, on_delete=models.CASCADE,blank=True, null=True)
     Service = models.ManyToManyField(Service, blank=True)
     Address = models.TextField()
+    lat = models.FloatField(default=0)
+    lng = models.FloatField(default=0)
     MobileNo = models.CharField(max_length=20)
     
 
@@ -84,6 +89,9 @@ class Profile(models.Model):
 class UserProfile(models.Model):
     User = models.OneToOneField(User, on_delete=models.CASCADE)
     Image = models.OneToOneField(Images, on_delete=models.CASCADE,blank=True, null=True)
+    Address = models.TextField(null=True, blank=True)
+    lat = models.FloatField(default=0)
+    lng = models.FloatField(default=0)
     
     def __str__(self):
         return self.User

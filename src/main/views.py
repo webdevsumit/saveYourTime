@@ -193,13 +193,14 @@ def signup(request):
         serialized_data = UserSerializer(data=request.data)
         if serialized_data.is_valid(raise_exception=True):
             user = serialized_data.create(serialized_data.validated_data)
-            
+            user.set_password(request.data['password'])
+            user.save()
             img_ = request.FILES.get('image')
             
             Profile_Image=Images.objects.create(Image=img_)
             Profile_Image.save()
             
-            userprofile = UserProfile.objects.create(User=user,Image=Profile_Image)
+            userprofile = UserProfile.objects.create(User=user,Image=Profile_Image,Address=request.data['Address'])
             userprofile.save()
             
             
@@ -220,7 +221,6 @@ def signupAsProvider(request):
         user_exist = User.objects.filter(username=request.data['username']).exists()
         if user_exist:
             return Response({'error':'Username already exist.'})
-
 
         user_data = UserSerializer(data=request.data)
         if user_data.is_valid(raise_exception=True):
@@ -386,7 +386,53 @@ def setEmail(request):
         return Response(data)
 
 
+@api_view(['POST'])
+def setMyAddr(request):
+    if request.method=='POST':
+        data={}
+
+        try:
+            profile = Profile.objects.get(User__username=request.data['username'])
+            profile.Address = request.data['Address']
+            profile.save()
+            data['profile'] = ProfileSerializer(profile, context={'request':request}).data
+            
+        except:
+            profile = UserProfile.objects.get(User__username=request.data['username'])
+            profile.Address = request.data['Address']
+            profile.save()
+            data['profile'] = UserProfileSerializer(profile, 
+                                context={'request':request}).data
+
+        return Response(data)
         
+
+
+
+
+@api_view(['POST'])
+def setMyNo(request):
+    if request.method=='POST':
+        data={}
+
+        try:
+            profile = Profile.objects.get(User__username=request.data['username'])
+            profile.MobileNo = request.data['MobileNo']
+            profile.save()
+            data['profile'] = ProfileSerializer(profile, context={'request':request}).data
+            
+        except:
+            profile = UserProfile.objects.get(User__username=request.data['username'])
+            profile.MobileNo = request.data['MobileNo']
+            profile.save()
+            data['profile'] = UserProfileSerializer(profile, 
+                                context={'request':request}).data
+
+        return Response(data)
+
+
+
+
 @api_view(['POST'])
 def setShopName(request):
     if request.method=='POST':
