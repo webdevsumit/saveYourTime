@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect
 from rest_framework import generics
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth import (authenticate,login,logout)
 import datetime
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+
 
 
 from .models import (
@@ -82,6 +86,7 @@ def fetchingMessages(username,msgMan):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def logo(request):
     if request.method=='GET':
         data=LogosSerializer(Logos.objects.filter(active=True), 
@@ -91,6 +96,7 @@ def logo(request):
         
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def mainPageData(request):
     if request.method=='POST':
         data = {}
@@ -115,6 +121,7 @@ def mainPageData(request):
         return Response(data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def FAQData(request):
     if request.method=='GET':
     
@@ -125,6 +132,7 @@ def FAQData(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def messageBox(request):
     if request.method=='POST':
         data = MessageBox.objects.filter(Username = request.data['Username'])
@@ -132,6 +140,7 @@ def messageBox(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def messages(request):
     if request.method=='POST':
         
@@ -146,6 +155,7 @@ def messages(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addMessages(request):
     if request.method=='POST':
     
@@ -165,6 +175,7 @@ def addMessages(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addNewSmsBox(request):
     if request.method=='POST':
     
@@ -211,7 +222,8 @@ def signup(request):
                 user_.save()
                 login(request,user_)
                             
-            return Response(serialized_data.validated_data)
+            token, _  = Token.objects.get_or_create(user_id=user.id)
+            return Response({"token": token.key})
 
 
 @api_view(['POST'])
@@ -245,35 +257,20 @@ def signupAsProvider(request):
                 user.save()
                 login(request,user_)
             
-            return Response(user_data.validated_data)
+            token, _  = Token.objects.get_or_create(user_id=user.id)
+            return Response({"token": token.key})
 
-
-@api_view(['POST'])
-def login(request):
-    if request.method=='POST':
-    
-        user_exist = User.objects.filter(username=request.data['username']).exists()
-        if not user_exist :
-            return Response({'error':'User not exist.'})
-        
-        user = authenticate(
-            username=request.data['username'],
-            password=request.data['password']
-        )
-        if user is not None:
-            user.last_login = datetime.datetime.now()
-            user.save()                 
-            return Response({'msg':'mission successfull'})
-        else:
-            return Response({'error':'Please check password.'})
+            
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def logout(request):
     if request.method=='GET':
         print('loging out!')
         return Response({'msg':'logout successfully.'})
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addFeedback(request):
     if request.method=='POST':
         username = request.data['username']
@@ -298,6 +295,7 @@ def addFeedback(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def account(request):
     if request.method=='POST':
         data={}
@@ -316,6 +314,7 @@ def account(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setFirstname(request):
     if request.method=='POST':
         user = User.objects.get(username=request.data['username'])
@@ -340,6 +339,7 @@ def setFirstname(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setLastname(request):
     if request.method=='POST':
         user = User.objects.get(username=request.data['username'])
@@ -364,6 +364,7 @@ def setLastname(request):
  
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setEmail(request):
     if request.method=='POST':
         user = User.objects.get(username=request.data['username'])
@@ -387,6 +388,7 @@ def setEmail(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setMyAddr(request):
     if request.method=='POST':
         data={}
@@ -411,6 +413,7 @@ def setMyAddr(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setMyNo(request):
     if request.method=='POST':
         data={}
@@ -434,6 +437,7 @@ def setMyNo(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setShopName(request):
     if request.method=='POST':
         service = Service.objects.get(id=request.data['id'])
@@ -453,6 +457,7 @@ def setShopName(request):
         
         
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def ShopCatagories(request):
     if request.method=='GET':
 
@@ -463,6 +468,7 @@ def ShopCatagories(request):
         return Response(data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def updateShopCatagory(request):
     if request.method=='POST':
         service = Service.objects.get(id=request.data['serviceId'])
@@ -483,6 +489,7 @@ def updateShopCatagory(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def updateMainImage(request):
     if request.method=='POST':
     
@@ -502,6 +509,7 @@ def updateMainImage(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def updateImage(request):
     if request.method=='POST':
     
@@ -519,6 +527,7 @@ def updateImage(request):
         
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addNewImage(request):
     if request.method=='POST':
     
@@ -541,6 +550,7 @@ def addNewImage(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setOpenTime(request):
     if request.method=='POST':
     
@@ -559,6 +569,7 @@ def setOpenTime(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setCloseTime(request):
     if request.method=='POST':
     
@@ -577,6 +588,7 @@ def setCloseTime(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setPriceType(request):
     if request.method=='POST':
     
@@ -594,6 +606,7 @@ def setPriceType(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def deleteSearchName(request):
     if request.method=='POST':
     
@@ -609,6 +622,7 @@ def deleteSearchName(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def deleteImage(request):
     if request.method=='POST':
     
@@ -624,6 +638,7 @@ def deleteImage(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addSearchName(request):
     if request.method=='POST':
     
@@ -643,6 +658,7 @@ def addSearchName(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addNewService(request):
     if request.method=='POST':
     
@@ -668,6 +684,7 @@ def addNewService(request):
         return Response(data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def search(request):
     searchName = request.data['searchName'].upper()
 
@@ -680,6 +697,7 @@ def search(request):
     
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def productData(request):
 
     data={}
@@ -706,6 +724,7 @@ def productData(request):
     return Response(data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def giveRating(request):
     if request.method=='POST':
 
@@ -737,6 +756,7 @@ def giveRating(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def addServiceFeed(request):
     if request.method=='POST':
 
@@ -766,6 +786,7 @@ def addServiceFeed(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def updateDesc(request):
     if request.method=='POST':
 
@@ -785,6 +806,7 @@ def updateDesc(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def removeItem(request):
     if request.method=='POST':
 

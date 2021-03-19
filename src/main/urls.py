@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework.authtoken.views import obtain_auth_token
 from .views import (mainPageData,
                     messageBox,
                     messages,
@@ -7,7 +8,6 @@ from .views import (mainPageData,
                     logo,
                     signup,
                     signupAsProvider,
-                    login,
                     logout,
                     account,
                     setFirstname,
@@ -41,6 +41,7 @@ from .views import (mainPageData,
 app_name = 'main'
 
 urlpatterns = [
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('mainPageData/', mainPageData,name='main_page_data'),
     path('messageBox/', messageBox, name='messageBox'),
     path('messages/', messages, name='messages'),
@@ -48,7 +49,6 @@ urlpatterns = [
     path('logo/', logo, name='logo'),
     path('signup/', signup, name='signup'),
     path('signupAsProvider/', signupAsProvider,name='signupAsProvider'),
-    path('login/', login, name='login'),
     path('logout/', logout, name='logout'),
     path('addFeedback/', addFeedback, name='addFeedback'),
     path('account/', account, name='account'),
