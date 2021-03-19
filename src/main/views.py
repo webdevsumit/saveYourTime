@@ -86,7 +86,6 @@ def fetchingMessages(username,msgMan):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def logo(request):
     if request.method=='GET':
         data=LogosSerializer(Logos.objects.filter(active=True), 
@@ -96,7 +95,6 @@ def logo(request):
         
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def mainPageData(request):
     if request.method=='POST':
         data = {}
@@ -121,7 +119,6 @@ def mainPageData(request):
         return Response(data)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def FAQData(request):
     if request.method=='GET':
     
@@ -684,7 +681,6 @@ def addNewService(request):
         return Response(data)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def search(request):
     searchName = request.data['searchName'].upper()
 
