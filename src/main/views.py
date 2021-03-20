@@ -386,6 +386,33 @@ def setEmail(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def setPassword(request):
+    if request.method=='POST':
+    
+        user = authenticate(username=request.data['username'], password=request.data['oldPassword'])
+
+        if user is not None:
+            user.set_password(request.data['password'])
+            user.save()
+
+
+            data={}
+            
+            try:
+                profile = Profile.objects.get(User__username=request.data['username'])
+                data['profile'] = ProfileSerializer(profile, context={'request':request}).data
+                        
+            except:
+                profile = UserProfile.objects.get(User__username=request.data['username'])
+                data['profile'] = UserProfileSerializer(profile, 
+                                            context={'request':request}).data
+            return Response(data)
+        else:
+            return Response({'msg':'err'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def setMyAddr(request):
     if request.method=='POST':
         data={}
