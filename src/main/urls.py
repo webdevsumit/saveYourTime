@@ -37,6 +37,13 @@ from .views import (mainPageData,
                     updateDesc,
                     removeItem,
                     FAQData,
+                    posts,
+                    addPostComment,
+                    removePostComment,
+                    addPostCommentReply,
+                    removePostCommentReply,
+                    addPostLike,
+                    savePost,
                     )
 
 app_name = 'main'
@@ -80,7 +87,14 @@ urlpatterns = [
     path('updateDesc/',updateDesc,name='updateDesc'),
     path('removeItem/',removeItem,name='removeItem'),
     path('FAQData/',FAQData,name='FAQData'),
-
+    path('posts/',posts,name='posts'),
+    path('addPostComment/',addPostComment,name='addPostComment'),
+    path('removePostComment/',removePostComment,name='removePostComment'),
+    path('addPostCommentReply/',addPostCommentReply,name='addPostCommentReply'),
+    path('removePostCommentReply/',removePostCommentReply,name='removePostCommentReply'),
+    path('addPostLike/',addPostLike,name='addPostLike'),
+    path('savePost/',savePost,name='savePost'),
+    
 ]
 
 

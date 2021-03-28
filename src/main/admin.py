@@ -4,6 +4,9 @@ from .models import (
     Images,
     ServicesCatagory,
     SearchName,
+    PostCommentsReplies,
+    PostComments,
+    Post,
     Service,
     Feedbacks,
     Profile,
@@ -16,6 +19,8 @@ from .models import (
     GroupMessages,
     FAQ,
     InterestedService,
+    TotalHits,
+    TotalHitsPerPersonPerDay,
 )
 
 # Register your models here.
@@ -25,6 +30,9 @@ admin.site.register(Logos)
 admin.site.register(Images)
 admin.site.register(ServicesCatagory)
 admin.site.register(SearchName)
+admin.site.register(PostCommentsReplies)
+admin.site.register(PostComments)
+admin.site.register(Post)
 admin.site.register(Service)
 admin.site.register(Profile)
 admin.site.register(Feedbacks)
@@ -37,3 +45,5 @@ admin.site.register(FAQ)
 admin.site.register(MessageBox)
 admin.site.register(UserProfile)
 admin.site.register(InterestedService)
+admin.site.register(TotalHits)
+admin.site.register(TotalHitsPerPersonPerDay)

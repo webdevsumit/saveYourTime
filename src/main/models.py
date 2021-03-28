@@ -51,6 +51,36 @@ class ServiceFeedback(models.Model):
         return self.Username
         
 
+class PostCommentsReplies(models.Model):
+    Username = models.CharField(max_length=1000)
+    Reply = models.TextField()
+
+    def __str__(self):
+        return self.Username
+
+class PostComments(models.Model):
+    Username = models.CharField(max_length=1000)
+    Comment = models.TextField()
+    Replies = models.ManyToManyField(PostCommentsReplies, blank=True)
+
+    def __str__(self):
+        return self.Username
+
+class Post(models.Model):
+    Image = models.ImageField(upload_to='postImages', null=True, blank=True)
+    HasImage = models.BooleanField()
+    Tittle = models.TextField()
+    Media = models.FileField(upload_to='Posts', blank = True)
+    Text = models.TextField()
+    TotalLikes = models.IntegerField(default=0)
+    LikedBy = models.ManyToManyField(User, blank=True)
+    Comments = models.ManyToManyField(PostComments, blank=True)
+    Activated = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.Tittle
+
+
 class Service(models.Model):
     Rating = models.FloatField(default=3)
     RatedBy = models.ManyToManyField(User, blank=True)
@@ -68,7 +98,10 @@ class Service(models.Model):
     Address = models.TextField(default='0')
     lat = models.FloatField(default=0)
     lng = models.FloatField(default=0)
-    
+
+    Posts = models.ManyToManyField(Post, blank=True)
+    Activated = models.BooleanField(default=True)
+            
     def __str__(self):
         return self.ShopName
 
@@ -76,11 +109,18 @@ class Service(models.Model):
 class Profile(models.Model):
     User = models.OneToOneField(User, on_delete=models.CASCADE)
     Image = models.OneToOneField(Images, on_delete=models.CASCADE,blank=True, null=True)
-    Service = models.ManyToManyField(Service, blank=True)
     Address = models.TextField()
     lat = models.FloatField(default=0)
     lng = models.FloatField(default=0)
     MobileNo = models.CharField(max_length=20)
+    
+    LastCategory = models.OneToOneField(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True)
+    LastSearcheTag = models.TextField(default='RENTYUG')
+    LastProductTags = models.ManyToManyField(SearchName,blank=True)
+    LastSearchNotFound = models.TextField(default='RENTYUG')
+    SavedPosts = models.ManyToManyField(Post, blank=True, related_name = 'SavedPost+')
+
+    Service = models.ManyToManyField(Service, blank=True)
     
 
     def __str_(self):
@@ -92,6 +132,12 @@ class UserProfile(models.Model):
     Address = models.TextField(null=True, blank=True)
     lat = models.FloatField(default=0)
     lng = models.FloatField(default=0)
+
+    LastCategory = models.OneToOneField(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True)
+    LastSearcheTag = models.TextField(default='RENTYUG')
+    LastProductTags = models.ManyToManyField(SearchName, blank=True)
+    LastSearchNotFound = models.TextField(default='RENTYUG')
+    SavedPosts = models.ManyToManyField(Post, blank=True, related_name = 'SavedPost+')    
     
     def __str__(self):
         return self.User
@@ -156,5 +202,19 @@ class FAQ(models.Model):
     def __str__(self):
         return self.Q
 
+        
 
-    
+class TotalHits(models.Model):
+    Hits = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.Hits)
+
+
+class TotalHitsPerPersonPerDay(models.Model):
+    Username = models.CharField(max_length=1000)
+    Hits = models.IntegerField(default=0)
+    Date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.Date )+'     -->'+str(self.Hits)

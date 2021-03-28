@@ -7,6 +7,9 @@ from .models import (
     Images,
     ServicesCatagory,
     SearchName,
+    PostCommentsReplies,
+    PostComments,
+    Post,
     Service,
     Feedbacks,
     Profile,
@@ -19,6 +22,8 @@ from .models import (
     GroupMessages,
     FAQ,
     InterestedService,
+    TotalHits,
+    TotalHitsPerPersonPerDay,
 )
 
 
@@ -88,12 +93,33 @@ class ServiceFeedbackSerializer(serializers.ModelSerializer):
         model = ServiceFeedback
         fields = '__all__'
 
+class PostCommentsRepliesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostCommentsReplies
+        fields = ('id', 'Username', 'Reply')
+
+class PostCommentsSerializer(serializers.ModelSerializer):
+    Replies = PostCommentsRepliesSerializer(many=True)
+    class Meta:
+        model = PostComments
+        fields = ('id', 'Username', 'Comment', 'Replies')
+
+class PostSerializer(serializers.ModelSerializer):
+    Comments = PostCommentsSerializer(many=True)
+    LikedBy = UserSerializer(many=True)
+    class Meta:
+        model = Post
+        fields = ('id', 'Image', 'HasImage', 'Tittle', 'Media', 'Text', 'TotalLikes', 'LikedBy',
+                    'Comments', 'Activated')
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     RatedBy = UserSerializer(many=True)
     ServiceImages = ImagesSerializer(many=True)
     Type = ServicesCatagorySerializer()
     SearchNames = SearchNameSerializer(many=True)
     ServiceFeedback = ServiceFeedbackSerializer(many=True)
+    Posts = PostSerializer(many=True)
     class Meta:
         model = Service
         fields = '__all__'
@@ -103,6 +129,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     User = UserSerializer()
     Image = ImagesSerializer()
     Service = ServiceSerializer(many=True)
+    LastCategory = ServicesCatagorySerializer()
+    LastProductTags = SearchNameSerializer(many=True)
+    SavedPosts = PostSerializer(many=True)
     class Meta:
         model = Profile
         fields = '__all__'
@@ -111,6 +140,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     User = UserSerializer()
     Image = ImagesSerializer()
+    LastCategory = ServicesCatagorySerializer()
+    LastProductTags = SearchNameSerializer(many=True)
+    SavedPosts = PostSerializer(many=True)
     class Meta:
         model = UserProfile
         fields = '__all__'
@@ -165,6 +197,15 @@ class FAQSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TotalHitsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TotalHits
+        fields = '__all__'
+
+class TotalHitsPerPersonPerDaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TotalHitsPerPersonPerDay
+        fields = '__all__'
 
 
 

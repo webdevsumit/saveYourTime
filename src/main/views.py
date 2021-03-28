@@ -17,6 +17,9 @@ from .models import (
     Images,
     ServicesCatagory,
     SearchName,
+    PostCommentsReplies,
+    PostComments,
+    Post,
     Service,
     Feedbacks,
     Profile,
@@ -29,6 +32,8 @@ from .models import (
     GroupMessages,
     FAQ,
     InterestedService,
+    TotalHits,
+    TotalHitsPerPersonPerDay,
 )
 
 from .serializers import (
@@ -37,6 +42,9 @@ from .serializers import (
     ImagesSerializer,
     ServicesCatagorySerializer,
     SearchNameSerializer,
+    PostCommentsRepliesSerializer,
+    PostCommentsSerializer,
+    PostSerializer,
     ServiceSerializer,
     FeedbacksSerializer,
     ProfileSerializer,
@@ -49,6 +57,8 @@ from .serializers import (
     GroupMessagesSerializer,
     FAQSerializer,
     InterestedServiceSerializer,
+    TotalHitsSerializer,
+    TotalHitsPerPersonPerDaySerializer,
 )
 
 
@@ -97,6 +107,16 @@ def logo(request):
 @api_view(['POST'])
 def mainPageData(request):
     if request.method=='POST':
+
+
+        web_hits = TotalHits.objects.all()
+        if web_hits.exists():
+            web_hits = TotalHits.objects.all()[0]
+            web_hits.Hits = int(web_hits.Hits)+1
+            web_hits.save()
+        else:
+            web_hits = TotalHits.objects.create(Hits=1)
+        
         data = {}
         data['ServiceCatagories']=ServicesCatagorySerializer(ServicesCatagory.objects.all(),
         many=True, context={'request':request}).data
@@ -107,12 +127,16 @@ def mainPageData(request):
         data['FrontPageFeedback']=FrontPageFeedbackSerializer(FrontPageFeedback.objects.filter(Type='Good'),
         many=True, context={'request':request}).data
 
-
-        if InterestedService.objects.filter(User__username=request.data['user']).exists():
+        if request.data['user'] is not None:
         
             data['InterestedService']=InterestedServiceSerializer(InterestedService.objects.get(User__username=request.data['user']),
                     context={'request':request}).data
 
+            web_hits_pppp = TotalHitsPerPersonPerDay.objects.get_or_create(Username=request.data['user'], Date=datetime.date.today())[0]
+            web_hits_pppp.Hits = web_hits_pppp.Hits+1
+            web_hits_pppp.save()
+
+            
         else:
             data['InterestedService']={}
         
@@ -716,6 +740,21 @@ def search(request):
     s_data['data'] = ServiceSerializer(Service.objects.filter(SearchNames__Name=searchName), many=True, 
     context={'request':request}).data
 
+    if request.data['Username'] is not None:
+    
+        if Profile.objects.filter(User__username=request.data['Username']).exists():
+            profile = Profile.objects.get(User__username=request.data['Username'])
+        else:
+            profile = UserProfile.objects.get(User__username=request.data['Username'])
+
+
+        if Service.objects.filter(SearchNames__Name=searchName).exists():
+            profile.LastSearcheTag = searchName
+        else:
+            profile.LastSearchNotFound = searchName
+
+        profile.save()
+
     return Response(s_data)
     
 
@@ -743,7 +782,20 @@ def productData(request):
 
     IService1.Services.add(service)
     IService1.save()
-    
+
+
+    if Profile.objects.filter(User__username=request.data['Username']).exists():
+        profile = Profile.objects.get(User__username=request.data['Username'])
+    else:
+        profile = UserProfile.objects.get(User__username=request.data['Username'])
+
+
+    for tag in service.SearchNames.all():
+        profile.LastProductTags.add(tag)
+        
+    profile.LastCategory=service.Type
+    profile.save()
+     
     return Response(data)
 
 @api_view(['POST'])
@@ -849,7 +901,182 @@ def removeItem(request):
 
         return Response(data)
 
+def getPostData(Username,request):
 
+    if Username is not None:
+
+        data = {}
+        data['data'] = []
+
+        if Profile.objects.filter(User__username=Username).exists():
+            profile = Profile.objects.get(User__username=Username)
+        else:
+            profile = UserProfile.objects.get(User__username=Username)
+
+        
+        service_tags = profile.LastProductTags.all()
+           
+        for tag in service_tags:
+            for serv in ServiceSerializer(Service.objects.filter(SearchNames__Name=tag.Name, Posts__Activated=True),
+                                             many=True, context={'request':request}).data:
+                if serv not in data['data']:
+                    data['data'].append(serv)
+            
+        
+        for serv in ServiceSerializer(Service.objects.filter(SearchNames__Name=profile.LastSearchNotFound, Posts__Activated=True),many=True, 
+                                            context={'request':request}).data:
+            if serv not in data['data']:
+                data['data'].append(serv)
+
+                                            
+        for serv in ServiceSerializer(Service.objects.filter(SearchNames__Name=profile.LastSearcheTag, Posts__Activated=True),many=True, 
+                                            context={'request':request}).data:
+            if serv not in data['data']:
+                data['data'].append(serv)
+
+        
+        for serv in ServiceSerializer(Service.objects.filter(Type=profile.LastCategory, Posts__Activated=True), many=True, 
+                                            context={'request':request}).data:
+            if serv not in data['data']:
+                data['data'].append(serv)
+                
+        if len(data['data'])<=5:
+            for serv in ServiceSerializer(Service.objects.filter(
+                Posts__Activated=True).order_by('-Posts__TotalLikes'), many=True, context={'request':request}).data:
+                if serv not in data['data']:
+                    data['data'].append(serv)
+
+        return data
+
+        
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def posts(request):
+    if request.method=='POST':
+
+        data = getPostData(request.data['Username'],request)
+
+        return Response(data)
+
+        
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addPostComment(request):
+    if request.method=='POST':
+
+        post = Post.objects.get(id=request.data['postId'])
+
+        comment = PostComments.objects.create(Username=request.data['Username'],Comment=request.data['comment'])
+
+        post.Comments.add(comment)
+        comment.save()
+        post.save()
+
+
+        data = getPostData(request.data['Username'],request)
+        
+        return Response(data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def removePostComment(request):
+    if request.method=='POST':
+
+        comment = PostComments.objects.get(id=request.data['commentId'])
+        comment.delete()
+
+
+        data = getPostData(request.data['Username'],request)
+
+        return Response(data)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addPostCommentReply(request):
+    if request.method=='POST':
+
+        comment = PostComments.objects.get(id=request.data['commentId'])
+        reply = PostCommentsReplies.objects.create(Username=request.data['Username'],Reply=request.data['reply'])
+
+        comment.Replies.add(reply)
+        reply.save()
+        comment.save()
+
+
+        data = getPostData(request.data['Username'],request)
+
+        return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def removePostCommentReply(request):
+    if request.method=='POST':
+
+        reply = PostCommentsReplies.objects.get(id=request.data['replyId'])
+        reply.delete()
+
+
+        data = getPostData(request.data['Username'],request)
+
+        return Response(data)
+
+
+        
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addPostLike(request):
+    if request.method=='POST':
+
+        if Profile.objects.filter(User__username=request.data['Username']).exists():
+            profile = Profile.objects.get(User__username=request.data['Username'])
+        else:
+            profile = UserProfile.objects.get(User__username=request.data['Username'])        
+
+        post = Post.objects.get(id=request.data['postId'])
+
+        if post.LikedBy.filter(id=profile.User.id).exists():
+            
+            post.LikedBy.remove(profile.User)
+            post.TotalLikes = int(post.TotalLikes)-1
+        else:
+        
+            post.LikedBy.add(profile.User)
+            post.TotalLikes = int(post.TotalLikes)+1
+        post.save()
+
+        data = getPostData(request.data['Username'],request)
+
+        return Response(data)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def savePost(request):
+    if request.method=='POST':
+
+        if Profile.objects.filter(User__username=request.data['Username']).exists():
+            profile = Profile.objects.get(User__username=request.data['Username'])
+        else:
+            profile = UserProfile.objects.get(User__username=request.data['Username'])        
+
+        post = Post.objects.get(id=request.data['postId'])
+
+        if profile.SavedPosts.filter(id=post.id).exists():
+            
+            profile.SavedPosts.remove(post)
+            
+        else:
+        
+            profile.SavedPosts.remove(post)
+
+        post.save()
+
+        return Response({'msg':'saved'})
 
 
 
