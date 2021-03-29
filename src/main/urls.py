@@ -44,6 +44,9 @@ from .views import (mainPageData,
                     removePostCommentReply,
                     addPostLike,
                     savePost,
+                    myPosts,
+                    activatePostTogle,
+                    addNewPost,
                     )
 
 app_name = 'main'
@@ -94,6 +97,9 @@ urlpatterns = [
     path('removePostCommentReply/',removePostCommentReply,name='removePostCommentReply'),
     path('addPostLike/',addPostLike,name='addPostLike'),
     path('savePost/',savePost,name='savePost'),
+    path('myPosts/',myPosts,name='myPosts'),
+    path('activatePostTogle/',activatePostTogle,name='activatePostTogle'),
+    path('addNewPost/',addNewPost,name='addNewPost'),
     
 ]
 

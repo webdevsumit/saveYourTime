@@ -974,7 +974,15 @@ def addPostComment(request):
         post.save()
 
 
-        data = getPostData(request.data['Username'],request)
+        if request.data['type']=='myPost':
+            profile = Profile.objects.get(User__username=request.data['Username'])
+            services = profile.Service.all()
+            data={}
+            data['data'] = ServiceSerializer(services, many=True, context={'request':request}).data
+
+        else:
+            data = getPostData(request.data['Username'],request)
+
         
         return Response(data)
 
@@ -986,8 +994,15 @@ def removePostComment(request):
         comment = PostComments.objects.get(id=request.data['commentId'])
         comment.delete()
 
+        if request.data['type']=='myPost':
+            profile = Profile.objects.get(User__username=request.data['Username'])
+            services = profile.Service.all()
+            data={}
+            data['data'] = ServiceSerializer(services, many=True, context={'request':request}).data
 
-        data = getPostData(request.data['Username'],request)
+        else:
+            data = getPostData(request.data['Username'],request)
+
 
         return Response(data)
 
@@ -1006,7 +1021,15 @@ def addPostCommentReply(request):
         comment.save()
 
 
-        data = getPostData(request.data['Username'],request)
+        if request.data['type']=='myPost':
+            profile = Profile.objects.get(User__username=request.data['Username'])
+            services = profile.Service.all()
+            data={}
+            data['data'] = ServiceSerializer(services, many=True, context={'request':request}).data
+
+        else:
+            data = getPostData(request.data['Username'],request)
+
 
         return Response(data)
 
@@ -1019,8 +1042,14 @@ def removePostCommentReply(request):
         reply = PostCommentsReplies.objects.get(id=request.data['replyId'])
         reply.delete()
 
+        if request.data['type']=='myPost':
+            profile = Profile.objects.get(User__username=request.data['Username'])
+            services = profile.Service.all()
+            data={}
+            data['data'] = ServiceSerializer(services, many=True, context={'request':request}).data
 
-        data = getPostData(request.data['Username'],request)
+        else:
+            data = getPostData(request.data['Username'],request)
 
         return Response(data)
 
@@ -1046,9 +1075,25 @@ def addPostLike(request):
         
             post.LikedBy.add(profile.User)
             post.TotalLikes = int(post.TotalLikes)+1
+
+        service = Service.objects.get(Posts__id=post.id)
+
+        plan = Plans.objects.get(Open=True, PlanName='500')
+
+        if service in plan.PlanServices.all():
+            pass
+        elif int(post.TotalLikes)>500 :
+            post.Activated=False
         post.save()
 
-        data = getPostData(request.data['Username'],request)
+
+        if request.data['type']=='myPost':
+            services = profile.Service.all()
+            data={}
+            data['data'] = ServiceSerializer(services, many=True, context={'request':request}).data
+
+        else:
+            data = getPostData(request.data['Username'],request)
 
         return Response(data)
 
@@ -1077,6 +1122,100 @@ def savePost(request):
         post.save()
 
         return Response({'msg':'saved'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def myPosts(request):
+    if request.method=='POST':
+
+        if Profile.objects.filter(User__username=request.data['Username']).exists():
+            profile = Profile.objects.get(User__username=request.data['Username'])
+
+        else:
+            return Response({'msg':'You are not a Service Provider.'})
+            
+        services = profile.Service.all()
+        data = ServiceSerializer(services, many=True, context={'request':request}).data
+
+        return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def activatePostTogle(request):
+    if request.method=='POST':
+
+        post = Post.objects.get(id=request.data['postId'])
+
+        if post.Activated:
+            post.Activated = False
+
+        else:
+
+            plan = Plans.objects.get(Open=True, PlanName='500')
+
+            if Service.objects.get(id=request.data['serviceId']) in plan.PlanServices.all():
+                post.Activated = True
+
+            else:
+
+                if post.TotalLikes>500:
+                    return Response({'msg':'Call us to reactivate. Your post has over 500 likes'})
+
+                else:
+
+                    post.Activated = True
+
+        post.save()
+
+        if Profile.objects.filter(User__username=request.data['Username']).exists():
+            profile = Profile.objects.get(User__username=request.data['Username'])
+        else:
+            return Response({'msg':'You are not a Service Provider.'})
+  
+        services = profile.Service.all()
+        data = ServiceSerializer(services, many=True, context={'request':request}).data
+            
+        return Response(data)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addNewPost(request):
+    if request.method=='POST':
+
+        service = Service.objects.get(id=request.data['selectedServiceId'])
+
+        if service.Posts.count()>3:
+            return Response({'msg':'You cannot add more than 3 posts per service.'})
+
+        if request.data['hasImage']=='true':
+            hasImage=True
+        else:hasImage= False
+
+
+        post = Post.objects.create(
+                        Tittle=request.data['Tittle'],
+                        HasImage=hasImage,
+                        Image=request.FILES.get('Image'),
+                        Media=request.FILES.get('Media'),
+                        Text=request.data['Text']
+                )
+
+        service.Posts.add(post)
+        post.save()
+        service.save()
+
+        
+        profile = Profile.objects.get(User__username=request.data['Username'])
+        services = profile.Service.all()
+        data = ServiceSerializer(services, many=True, context={'request':request}).data
+        return Response(data)
+
+
+
 
 
 
