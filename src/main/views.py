@@ -1109,19 +1109,21 @@ def savePost(request):
         else:
             profile = UserProfile.objects.get(User__username=request.data['Username'])        
 
-        post = Post.objects.get(id=request.data['postId'])
+        service = Service.objects.get(id=request.data['serviceId'])
 
-        if profile.SavedPosts.filter(id=post.id).exists():
+        if profile.SavedServices.filter(id=service.id).exists():
             
-            profile.SavedPosts.remove(post)
-            
+            profile.SavedServices.remove(service)
+
+            profile.save()
+            return Response({'msg':'Service removed'})
         else:
         
-            profile.SavedPosts.remove(post)
+            profile.SavedServices.add(service)
 
-        post.save()
+            profile.save()
 
-        return Response({'msg':'saved'})
+            return Response({'msg':'Service saved'})
 
 
 @api_view(['POST'])
@@ -1214,8 +1216,20 @@ def addNewPost(request):
         data = ServiceSerializer(services, many=True, context={'request':request}).data
         return Response(data)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def savedServices(request):
+    if request.method=='POST':
 
+        if Profile.objects.filter(User__username=request.data['Username']).exists():
+            profile = Profile.objects.get(User__username=request.data['Username'])
+        else:
+            profile = UserProfile.objects.get(User__username=request.data['Username'])        
+        data={}
+        data['data']=ServiceSerializer(profile.SavedServices.all(), many=True, 
+                context={'request':request}).data
 
+        return Response(data)
 
 
 

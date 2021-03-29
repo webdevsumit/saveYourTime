@@ -131,7 +131,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     Service = ServiceSerializer(many=True)
     LastCategory = ServicesCatagorySerializer()
     LastProductTags = SearchNameSerializer(many=True)
-    SavedPosts = PostSerializer(many=True)
+    SavedServices = ServiceSerializer(many=True)
     class Meta:
         model = Profile
         fields = '__all__'
@@ -142,7 +142,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     Image = ImagesSerializer()
     LastCategory = ServicesCatagorySerializer()
     LastProductTags = SearchNameSerializer(many=True)
-    SavedPosts = PostSerializer(many=True)
+    SavedServices = ServiceSerializer(many=True)
     class Meta:
         model = UserProfile
         fields = '__all__'

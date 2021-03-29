@@ -114,11 +114,13 @@ class Profile(models.Model):
     lng = models.FloatField(default=0)
     MobileNo = models.CharField(max_length=20)
     
-    LastCategory = models.OneToOneField(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True)
+    LastCategory = models.ForeignKey(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True,
+             primary_key=False, unique=False)
     LastSearcheTag = models.TextField(default='RENTYUG')
     LastProductTags = models.ManyToManyField(SearchName,blank=True)
     LastSearchNotFound = models.TextField(default='RENTYUG')
-    SavedPosts = models.ManyToManyField(Post, blank=True, related_name = 'SavedPost+')
+    SavedServices = models.ManyToManyField(Service, blank=True, 
+        related_name = 'SavedServices+')
 
     Service = models.ManyToManyField(Service, blank=True)
     
@@ -133,11 +135,13 @@ class UserProfile(models.Model):
     lat = models.FloatField(default=0)
     lng = models.FloatField(default=0)
 
-    LastCategory = models.OneToOneField(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True)
+    LastCategory = models.ForeignKey(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True,
+            primary_key=False, unique=False)
     LastSearcheTag = models.TextField(default='RENTYUG')
     LastProductTags = models.ManyToManyField(SearchName, blank=True)
     LastSearchNotFound = models.TextField(default='RENTYUG')
-    SavedPosts = models.ManyToManyField(Post, blank=True, related_name = 'SavedPost+')    
+    SavedServices = models.ManyToManyField(Service, blank=True, 
+        related_name = 'SavedServices+')    
     
     def __str__(self):
         return self.User
