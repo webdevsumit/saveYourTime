@@ -940,7 +940,7 @@ def getPostData(Username,request):
             if serv not in data['data']:
                 data['data'].append(serv)
                 
-        if len(data['data'])<=5:
+        if len(data['data'])<=15:
             for serv in ServiceSerializer(Service.objects.filter(
                 Posts__Activated=True).order_by('-Posts__TotalLikes'), many=True, context={'request':request}).data:
                 if serv not in data['data']:

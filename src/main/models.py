@@ -10,6 +10,9 @@ class Logos(models.Model):
     Logo = models.ImageField(upload_to='logo')
     active = models.BooleanField(default=False)
 
+    def __str__(self):
+        return str(self.active)
+
 
 class Images(models.Model):
     Image = models.ImageField(upload_to='images')
@@ -125,8 +128,8 @@ class Profile(models.Model):
     Service = models.ManyToManyField(Service, blank=True)
     
 
-    def __str_(self):
-        return self.User
+    def __str__(self):
+        return self.User.username
 
 class UserProfile(models.Model):
     User = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -144,14 +147,14 @@ class UserProfile(models.Model):
         related_name = 'SavedServices+')    
     
     def __str__(self):
-        return self.User
+        return self.User.username
 
 class InterestedService(models.Model):
     User = models.OneToOneField(User, on_delete=models.CASCADE)
     Services = models.ManyToManyField(Service, blank=True)
 
     def __str__(self):
-        return self.User
+        return self.User.username
 
 
 
