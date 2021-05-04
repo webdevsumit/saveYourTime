@@ -13,7 +13,6 @@ from .models import (
     Service,
     Feedbacks,
     Profile,
-    UserProfile,
     ServiceFeedback,
     Plans,
     FrontPageFeedback,
@@ -125,6 +124,22 @@ class ServiceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ServiceSerializerForMainPage(serializers.ModelSerializer):
+    Type = ServicesCatagorySerializer()
+    class Meta:
+        model = Service
+        fields = ('id','Rating', 'Type', 'MainImage', 'ShopName', 'PriceType',
+                 'OpenTime', 'closeTime','VStatus','RentalStatus')
+
+
+class ServiceSerializerForPost(serializers.ModelSerializer):
+    Posts = PostSerializer(many=True)
+    class Meta:
+        model = Service
+        fields = ('id', 'ShopName','VStatus','Posts','RentalStatus')
+
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     User = UserSerializer()
     Image = ImagesSerializer()
@@ -137,28 +152,16 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    User = UserSerializer()
-    Image = ImagesSerializer()
-    LastCategory = ServicesCatagorySerializer()
-    LastProductTags = SearchNameSerializer(many=True)
-    SavedServices = ServiceSerializer(many=True)
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
-
 class InterestedServiceSerializer(serializers.ModelSerializer):
     User = UserSerializer()
-    Services = ServiceSerializer(many=True)
+    Services = ServiceSerializerForMainPage(many=True)
     class Meta:
         model = InterestedService
         fields = '__all__'
     
 
-
-
 class PlansSerializer(serializers.ModelSerializer):
-    PlanServices = ServiceSerializer(many=True)
+    PlanServices = ServiceSerializerForMainPage(many=True)
     class Meta:
         model = Plans
         fields = ( 'PlanName', 'Description', 'Rate', 'Open', 'PlanServices')

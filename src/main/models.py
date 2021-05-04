@@ -98,6 +98,8 @@ class Service(models.Model):
     ServiceFeedback = models.ManyToManyField(ServiceFeedback, blank=True)
     Description = models.TextField(default='Description box is empty.')
     VStatus = models.BooleanField(default=False)
+    RentalStatus = models.BooleanField(default=True)
+    NoOfItems = models.IntegerField(default=1)
     Address = models.TextField(default='0')
     lat = models.FloatField(default=0)
     lng = models.FloatField(default=0)
@@ -131,23 +133,6 @@ class Profile(models.Model):
     def __str__(self):
         return self.User.username
 
-class UserProfile(models.Model):
-    User = models.OneToOneField(User, on_delete=models.CASCADE)
-    Image = models.OneToOneField(Images, on_delete=models.CASCADE,blank=True, null=True)
-    Address = models.TextField(null=True, blank=True)
-    lat = models.FloatField(default=0)
-    lng = models.FloatField(default=0)
-
-    LastCategory = models.ForeignKey(ServicesCatagory, on_delete=models.SET_NULL,blank=True, null=True,
-            primary_key=False, unique=False)
-    LastSearcheTag = models.TextField(default='RENTYUG')
-    LastProductTags = models.ManyToManyField(SearchName, blank=True)
-    LastSearchNotFound = models.TextField(default='RENTYUG')
-    SavedServices = models.ManyToManyField(Service, blank=True, 
-        related_name = 'SavedServices+')    
-    
-    def __str__(self):
-        return self.User.username
 
 class InterestedService(models.Model):
     User = models.OneToOneField(User, on_delete=models.CASCADE)

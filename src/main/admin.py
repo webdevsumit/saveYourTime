@@ -10,7 +10,6 @@ from .models import (
     Service,
     Feedbacks,
     Profile,
-    UserProfile,
     ServiceFeedback,
     Plans,
     FrontPageFeedback,
@@ -43,7 +42,6 @@ admin.site.register(Messages)
 admin.site.register(GroupMessages)
 admin.site.register(FAQ)
 admin.site.register(MessageBox)
-admin.site.register(UserProfile)
 admin.site.register(InterestedService)
 admin.site.register(TotalHits)
 admin.site.register(TotalHitsPerPersonPerDay)
