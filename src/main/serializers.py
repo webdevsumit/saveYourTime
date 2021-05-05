@@ -44,7 +44,6 @@ class UserSerializer(serializers.ModelSerializer):
             v_password = data['password']
             user = super().create(data)
             user.set_password(v_password)
-            print('password is here --',v_password)
             user.save()
             return user
 

@@ -225,6 +225,9 @@ def signupAsProvider(request):
         if user_data.is_valid(raise_exception=True):
             user = user_data.create(user_data.validated_data)
 
+            user.set_password(request.data['password'])
+            user.save()
+
             img_ = request.FILES.get('image')
             
             Profile_Image=Images.objects.create(Image=img_)
