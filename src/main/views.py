@@ -128,9 +128,13 @@ def mainPageData(request):
         many=True, context={'request':request}).data
 
         if request.data['user'] is not None:
-        
-            data['InterestedService']=InterestedServiceSerializer(InterestedService.objects.get(User__username=request.data['user']),
-                    context={'request':request}).data
+            if InterestedService.objects.filter(User__username=request.data['user']).exists():
+            
+                data['InterestedService']=InterestedServiceSerializer(InterestedService.objects.get(User__username=request.data['user']),
+                        context={'request':request}).data
+
+            else:
+                data['InterestedService']={}
 
             web_hits_pppd = TotalHitsPerPersonPerDay.objects.get_or_create(Username=request.data['user'], Date=datetime.date.today())[0]
             web_hits_pppd.Hits = web_hits_pppd.Hits+1
