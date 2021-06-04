@@ -772,7 +772,7 @@ def giveRating(request):
         service = Service.objects.get(id=request.data['productId'])
         user = User.objects.get(username=request.data['user'])
 
-        service.Rating = ( service.Rating + (int(request.data['rating']))/10)/2
+        service.Rating = round(( service.Rating + (int(request.data['rating']))/10)/2,1)
 
         
         service.RatedBy.add(user)
@@ -1031,11 +1031,11 @@ def addPostLike(request):
 
         service = Service.objects.get(Posts__id=post.id)
 
-        plan = Plans.objects.get(Open=True, PlanName='500')
+        plan = Plans.objects.get(Open=True, PlanName='250')
 
         if service in plan.PlanServices.all():
             pass
-        elif int(post.TotalLikes)>500 :
+        elif int(post.TotalLikes)>250 :
             post.Activated=False
         post.save()
 
@@ -1105,15 +1105,15 @@ def activatePostTogle(request):
 
         else:
 
-            plan = Plans.objects.get(Open=True, PlanName='500')
+            plan = Plans.objects.get(Open=True, PlanName='250')
 
             if Service.objects.get(id=request.data['serviceId']) in plan.PlanServices.all():
                 post.Activated = True
 
             else:
 
-                if post.TotalLikes>500:
-                    return Response({'msg':'Call us to reactivate. Your post has over 500 likes'})
+                if post.TotalLikes>250:
+                    return Response({'msg':'Call us to reactivate. Your post has over 250 likes'})
 
                 else:
 
