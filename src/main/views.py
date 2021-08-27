@@ -241,7 +241,9 @@ def signupAsProvider(request):
             profile = Profile.objects.create(User=user,
                                             Address=request.data['Address'],
                                             MobileNo=request.data['MobileNo'],
-                                            Image=Profile_Image
+                                            Image=Profile_Image,
+                                            lat=request.data['lat'],
+                                            lng=request.data['lng']
                                             )
             profile.save()
 
@@ -396,7 +398,21 @@ def setMyAddr(request):
         return Response(data)
         
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def setLoc(request):
+    if request.method=='POST':
+        data={}
 
+        profile = Profile.objects.get(User__username=request.data['username'])
+        profile.lat = request.data['lat']
+        profile.lng = request.data['lng']
+        profile.save()
+        data['msg'] = 'Location updated.'
+            
+        
+        return Response(data)
+   
 
 
 @api_view(['POST'])
