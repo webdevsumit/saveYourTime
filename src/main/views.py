@@ -13,7 +13,6 @@ from rest_framework.authtoken.models import Token
 
 
 from .models import (
-    Logos,
     Images,
     ServicesCatagory,
     SearchName,
@@ -28,7 +27,6 @@ from .models import (
     FrontPageFeedback,
     Messages,
     MessageBox,
-    GroupMessages,
     FAQ,
     InterestedService,
     TotalHits,
@@ -37,7 +35,6 @@ from .models import (
 
 from .serializers import (
     UserSerializer,
-    LogosSerializer,
     ImagesSerializer,
     ServicesCatagorySerializer,
     SearchNameSerializer,
@@ -54,7 +51,6 @@ from .serializers import (
     FrontPageFeedbackSerializer,
     MessagesSerializer,
     MessagesBoxSerializer,
-    GroupMessagesSerializer,
     FAQSerializer,
     InterestedServiceSerializer,
     TotalHitsSerializer,
@@ -91,17 +87,6 @@ def fetchingMessages(username,msgMan):
         j+=1
     
     return data
-
-
-
-
-@api_view(['GET'])
-def logo(request):
-    if request.method=='GET':
-        data=LogosSerializer(Logos.objects.filter(active=True), 
-        many=True, context={'request':request}).data
-        return Response(data)
-
         
 
 @api_view(['POST'])
@@ -141,8 +126,13 @@ def mainPageData(request):
             web_hits_pppd.save()
 
             
+
+
         else:
             data['InterestedService']={}
+
+
+        
         
         return Response(data)
 
@@ -628,6 +618,27 @@ def setPriceType(request):
         service = Service.objects.get(id=request.data['id'])
 
         service.PriceType = request.data['priceType']
+        service.save()
+
+        data={}
+                
+        profile = Profile.objects.get(User__username=request.data['username'])
+        data['profile'] = ProfileSerializer(profile, context={'request':request}).data
+                            
+        return Response(data)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def updateServiceAddr(request):
+    if request.method=='POST':
+    
+        service = Service.objects.get(id = request.data['id'])
+
+        service.lat = request.data['lat']
+        service.lng = request.data['lng']
+        service.Address = request.data['Address']
         service.save()
 
         data={}

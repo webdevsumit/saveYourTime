@@ -3,7 +3,6 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 
 from .models import (
-    Logos,
     Images,
     ServicesCatagory,
     SearchName,
@@ -18,7 +17,6 @@ from .models import (
     FrontPageFeedback,
     Messages,
     MessageBox,
-    GroupMessages,
     FAQ,
     InterestedService,
     TotalHits,
@@ -55,13 +53,6 @@ class UserSerializer(serializers.ModelSerializer):
             except:
                 pass
             return user
-
-
-
-class LogosSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Logos
-        fields = '__all__'
 
 class ImagesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -186,12 +177,6 @@ class MessagesBoxSerializer(serializers.ModelSerializer):
         model = MessageBox
         fields = '__all__'
         
-
-class GroupMessagesSerializer(serializers.ModelSerializer):
-    Messages = MessagesSerializer(many=True)
-    class Meta:
-        model = GroupMessages
-        fields = '__all__'
 
 class FAQSerializer(serializers.ModelSerializer):
     class Meta:
